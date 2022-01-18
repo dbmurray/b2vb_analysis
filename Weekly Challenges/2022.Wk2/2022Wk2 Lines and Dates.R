@@ -8,6 +8,7 @@ library(tidyverse)
 library(readxl)
 library(ggplot2)
 library(hrbrthemes)
+library(stringr)
 
 # DATA IMPORT
 OECD_unemployment <- read_csv("Weekly Challenges/2022.Wk2/OECD Unemployment Rate_Full Data.csv")
@@ -16,7 +17,9 @@ OECD_unemployment <- read_csv("Weekly Challenges/2022.Wk2/OECD Unemployment Rate
 
 # the date field is of the wrong data type and we need to sort on date so this needs to be fixed by converting the type.
 # Keep in mind the date is in American format.
-OECD_unemployment <- mutate(OECD_unemployment, Date = as.Date(Date, "%m/%d/%Y"))
+# We also want to give a nice percentage number for unemployment rate rather than the whole number used here. 
+# Also, I hate all caps in values so converting Gender to title case.
+OECD_unemployment <- mutate(OECD_unemployment, Date = as.Date(Date, "%m/%d/%Y"), `Unemployement Rate` = `Unemployement Rate`/100, Gender = str_to_title(Gender))
 
 # DATA TRANSFORMATIONS
 
