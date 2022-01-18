@@ -6,15 +6,17 @@
 # LIBRARIES
 library(tidyverse)
 library(readxl)
+library(ggplot2)
+library(hrbrthemes)
 
 # DATA IMPORT
-OECD_unemploment <- read_csv("Weekly Challenges/2022.Wk2/OECD Unemployment Rate_Full Data.csv")
+OECD_unemployment <- read_csv("Weekly Challenges/2022.Wk2/OECD Unemployment Rate_Full Data.csv")
 
 # TIDY DATA
 
 # the date field is of the wrong data type and we need to sort on date so this needs to be fixed by converting the type.
 # Keep in mind the date is in American format.
-OECD_unemploment <- mutate(OECD_unemploment, Date = as.Date(Date, "%m/%d/%Y"))
+OECD_unemployment <- mutate(OECD_unemployment, Date = as.Date(Date, "%m/%d/%Y"))
 
 # DATA TRANSFORMATIONS
 
@@ -22,13 +24,28 @@ OECD_unemploment <- mutate(OECD_unemploment, Date = as.Date(Date, "%m/%d/%Y"))
 # to the next by a set of grouped variables - Country and Gender.
 
 
-OECD_unemploment <- OECD_unemploment%>%
+OECD_unemployment <- OECD_unemployment%>%
   group_by(`Country Code`, `Gender`) %>% # create groups in the data
   arrange(`Country Code`, `Gender`, Date) %>% #put in correct sort order - must sort by the group vars as well
   mutate(percent_change = (`Unemployement Rate` - lag(`Unemployement Rate`))/lag(`Unemployement Rate`)) # calculate change by year
 
+#unforunately this process creates a lot of NAs for the seed value of the %change index
+OECD_unemployment <- OECD_unemployment %>% replace(is.na(.), 0)
+
 # CHARTS & TABLES
 
+#lets look at some data just for the hell of it!
+
+#Heres the unemployment rate for all genders by country over time!
+ggplot(subset(OECD_unemployment, Gender %in% c("ALL")), aes(x = Date, y = `Unemployement Rate`, group = `Country Name`, colour = `Country Name`))+
+  geom_line() +
+  theme_ipsum() +
+  ggtitle("OECD Unemployment Rates | 2000 to 2021")
+
+#large long period of high unemployment in what seems to be Greece - that's quite interesting. 
+
 # EXPORTS
-write.csv(OECD_unemploment, "Weekly Challenges/2022.Wk2/OECD_unemployment_data.csv", row.names=FALSE)
+
+# Enough stuff around, let's export our tidied dataset.
+write.csv(OECD_unemployment, "Weekly Challenges/2022.Wk2/OECD_unemployment_data.csv", row.names=FALSE)
 
